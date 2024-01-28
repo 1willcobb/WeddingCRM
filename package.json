@@ -1,0 +1,18 @@
+{
+  "name": "weddingcrm",
+  "version": "1.0.0",
+  "description": "a CRM for wedding photographers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"cd client && npm run dev\" \"cd server && npm run dev\"",
+    "start-client": "cd client && npm start",
+    "start-server": "cd server && npm start"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^7.0.0"
+  }
+}
+  
