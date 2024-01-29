@@ -4,26 +4,61 @@ const typeDefs = gql`
   type Query {
     hello: String
     sup: String
+    clients: [Client]
   }
 
-  # type Mutation {
-  #   createClient(input: ClientInput!): Client
-  #   updateClient(id: ID!, input: ClientInput!): Client
-  #   deleteClient(id: ID!): Boolean
+  type Mutation {
+    addClient(
+      PK: ID!
+      SK: ID!
+      budget: Int
+      email: String
+      eventDate: String
+      inquiry: String
+      name: String
+      notes: String
+      package: String
+      phone: String
+      plannerPK: ID
+      projectPK: ID
+      status: String
+      venuePK: ID
+    ): Client
 
-  #   createVenue(input: VenueInput!): Venue
-  #   updateVenue(id: ID!, input: VenueInput!): Venue
-  #   deleteVenue(id: ID!): Boolean
+    updateClient(
+      PK: ID!
+      SK: ID!
+      budget: Int
+      email: String
+      eventDate: String
+      inquiry: String
+      name: String
+      notes: String
+      package: String
+      phone: String
+      plannerPK: ID
+      projectPK: ID
+      status: String
+      venuePK: ID
+    ): Client
 
-  #   createPlanner(input: PlannerInput!): Planner
-  #   updatePlanner(id: ID!, input: PlannerInput!): Planner
-  #   deletePlanner(id: ID!): Boolean
-
-  #   createProject(input: ProjectInput!): Project
-  #   updateProject(id: ID!, input: ProjectInput!): Project
-  #   deleteProject(id: ID!): Boolean
-  # }
-  
+    deleteClient(
+      PK: ID!
+      SK: ID!
+      budget: Int
+      email: String
+      eventDate: String
+      inquiry: String
+      name: String
+      notes: String
+      package: String
+      phone: String
+      plannerPK: ID
+      projectPK: ID
+      status: String
+      venuePK: ID
+    ): Client
+  }
 
   type Client {
     PK: ID!

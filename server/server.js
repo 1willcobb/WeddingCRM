@@ -1,10 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const { ApolloServer, gql } = require('apollo-server-express');
 const { typeDefs, resolvers } = require("./schemas");
+const ClientModel = require('./ClientModel');
 
-const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-
-const dynamoDBClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -12,7 +11,10 @@ const app = express();
 const apolloServer = new ApolloServer({
   typeDefs,
   resolvers,
-  // context: authMiddleware,
+  context: ({ req }) => ({
+    Client: ClientModel,
+    // Include other models or data as needed
+  }),
 });
 
 const startApolloServer = async () => {
