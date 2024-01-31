@@ -1,22 +1,21 @@
 import "./App.css";
-import { SUP } from "./utils/queries.jsx";
-import { useQuery } from "@apollo/client";
+import Home from "./pages/home";
+
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
-  // Query for getting single capsule data by passing in the id
-  const { loading, data } = useQuery(SUP);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   return (
-    <>
-      <h1>Heyo</h1>
-      {data && Object.values(data).map((key) => (
-        <p key={key}>{key}</p>
-      ))}
-    </>
+    <Router>
+      <div>
+        <main>
+          <Routes>
+            <Route path="/" element={<Home />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
   );
 }
 

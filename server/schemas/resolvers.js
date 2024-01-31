@@ -5,11 +5,16 @@ const resolvers = {
     clients: async (parent, args, context) => {
       return await context.Client.scan();
     },
+    queryByOrg: async (parent, args, context) => {
+      return await context.Client.queryByOrg();
+    }
   },
   Mutation: {
     addClient: async (_, args, context) => {
       try {
         // Assuming context.ClientModel is your DynamoDB client model
+        console.log("addClient")
+        console.log("args", args)
         return await context.Client.addClient(args);
       } catch (error) {
         // Handle the error here

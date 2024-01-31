@@ -5,6 +5,7 @@ const typeDefs = gql`
     hello: String
     sup: String
     clients: [Client]
+    queryByOrg: [Client]
   }
 
   type Mutation {

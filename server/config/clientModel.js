@@ -1,6 +1,7 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const {
   DynamoDBDocumentClient,
+  QueryCommand,
   ScanCommand,
   PutCommand,
   UpdateCommand,
@@ -33,6 +34,24 @@ const ClientModel = {
     }
   },
 
+  queryByOrg: async function () {
+    const params = {
+      TableName: TABLE_NAME,
+      KeyConditionExpression: "PK = :partitionKeyId",
+      ExpressionAttributeValues: {
+        ":partitionKeyId": "ORG::1",
+      },
+    };
+  
+    try {
+      const data = await docClient.send(new QueryCommand(params));
+      return data.Items;
+    } catch (error) {
+      console.error("Error querying table by organization:", error);
+      throw new Error("Error querying table by organization");
+    }
+  },
+
   addClient: async (clientData) => {
     const params = {
       TableName: TABLE_NAME, // Replace with your table name
@@ -43,8 +62,8 @@ const ClientModel = {
       await docClient.send(new PutCommand(params));
       return clientData; // Return the added client data
     } catch (error) {
-      console.error('Error adding client:', error);
-      throw new Error('Error adding client');
+      console.error("Error adding client:", error);
+      throw new Error("Error adding client");
     }
   },
 
@@ -53,7 +72,7 @@ const ClientModel = {
       throw new Error("No update data provided");
     }
 
-    let updateExpression = 'set';
+    let updateExpression = "set";
     let expressionAttributeNames = {};
     let expressionAttributeValues = {};
 
@@ -69,7 +88,7 @@ const ClientModel = {
 
     const params = {
       TableName: TABLE_NAME,
-      Key: { "PK": clientId }, // Assuming 'PK' is the primary key
+      Key: { PK: clientId }, // Assuming 'PK' is the primary key
       UpdateExpression: updateExpression,
       ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
@@ -80,26 +99,26 @@ const ClientModel = {
       const data = await docClient.send(new UpdateCommand(params));
       return data.Attributes; // Returns the updated attributes
     } catch (error) {
-      console.error('Error updating client:', error);
-      throw new Error('Error updating client');
+      console.error("Error updating client:", error);
+      throw new Error("Error updating client");
     }
   },
 
   deleteClient: async (clientId) => {
     const params = {
       TableName: TABLE_NAME,
-      Key: { "SK": clientId }, // Assuming 'SK' is the primary key
+      Key: { SK: clientId }, // Assuming 'SK' is the primary key
     };
 
     try {
       await docClient.send(new DeleteCommand(params));
       return clientId; // Returns the deleted client id
     } catch (error) {
-      console.error('Error deleting client:', error);
-      throw new Error('Error deleting client');
+      console.error("Error deleting client:", error);
+      throw new Error("Error deleting client");
     }
-  }
-  
+  },
+
   // Add other methods as needed (e.g., create, get, update, delete)
 };
 
