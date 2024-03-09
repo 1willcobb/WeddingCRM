@@ -3,11 +3,8 @@ const resolvers = {
     hello: () => "Hello, worlds!",
     sup: () => "Sup, world!",
     clients: async (parent, args, context) => {
-      return await context.Client.scan();
+      return await context.Client.clients();
     },
-    queryByOrg: async (parent, args, context) => {
-      return await context.Client.queryByOrg();
-    }
   },
   Mutation: {
     addClient: async (_, args, context) => {

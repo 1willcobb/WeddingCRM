@@ -19,30 +19,16 @@ const docClient = DynamoDBDocumentClient.from(dbClient);
 const TABLE_NAME = "WeddingCRM";
 
 const ClientModel = {
-  // Define a method to scan all items in the table
-  scan: async function () {
-    const params = {
-      TableName: TABLE_NAME, // Replace with your table name
-    };
-
-    try {
-      const data = await docClient.send(new ScanCommand(params));
-      return data.Items;
-    } catch (error) {
-      console.error("Error scanning table:", error);
-      throw new Error("Error scanning table");
-    }
-  },
-
-  queryByOrg: async function () {
+  //GET all clients for orginization
+  clients: async function () {
     const params = {
       TableName: TABLE_NAME,
-      KeyConditionExpression: "PK = :partitionKeyId",
+      KeyConditionExpression: "PK = :PK",
       ExpressionAttributeValues: {
-        ":partitionKeyId": "ORG::1",
+        ":PK": "ORG::1",
       },
     };
-  
+
     try {
       const data = await docClient.send(new QueryCommand(params));
       return data.Items;
@@ -52,6 +38,7 @@ const ClientModel = {
     }
   },
 
+  //PUT NEW client data
   addClient: async (clientData) => {
     const params = {
       TableName: TABLE_NAME, // Replace with your table name
@@ -67,6 +54,7 @@ const ClientModel = {
     }
   },
 
+  //PUT update client data
   updateClient: async (clientId, updateData) => {
     if (!updateData || Object.keys(updateData).length === 0) {
       throw new Error("No update data provided");
@@ -88,7 +76,7 @@ const ClientModel = {
 
     const params = {
       TableName: TABLE_NAME,
-      Key: { PK: clientId }, // Assuming 'PK' is the primary key
+      Key: { PK: "ORG::1", SK: clientId },
       UpdateExpression: updateExpression,
       ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
@@ -104,6 +92,7 @@ const ClientModel = {
     }
   },
 
+  //DELETE client data
   deleteClient: async (clientId) => {
     const params = {
       TableName: TABLE_NAME,

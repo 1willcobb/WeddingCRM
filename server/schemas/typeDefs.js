@@ -5,7 +5,6 @@ const typeDefs = gql`
     hello: String
     sup: String
     clients: [Client]
-    queryByOrg: [Client]
   }
 
   type Mutation {
@@ -72,7 +71,7 @@ const typeDefs = gql`
     notes: String
     package: String
     phone: String
-    plannerPK: ID
+    plannerPK: ID # add name of planner, maybe link to planner page
     projectPK: ID
     status: String
     venuePK: ID

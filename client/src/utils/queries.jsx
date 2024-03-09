@@ -8,9 +8,9 @@ export const SUP = gql`
 `;
 
 
-export const QueryByOrg = gql`
+export const CLIENTS = gql`
   query Query {
-    queryByOrg {
+    clients {
       PK
       SK
       budget
