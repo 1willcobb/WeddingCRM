@@ -18,52 +18,49 @@ const docClient = DynamoDBDocumentClient.from(dbClient);
 
 const TABLE_NAME = "WeddingCRM2";
 
-const ClientModel = {
-  //GET all clients for orginization
-  getClients: async function () {
+const PlannerModel = {
+  getPlanners: async function () {
     const params = {
       TableName: TABLE_NAME,
       KeyConditionExpression: "PK = :PK and begins_with(SK, :SKprefix)",
       ExpressionAttributeValues: {
-        ":PK": "ORG::1", //! hard coded needs to change
-        ":SKprefix": "CLIENT::"
+        ":PK": "ORG::1", //! hard coded needs to pull from the context user
+        ":SKprefix": "PLANNER::",
       },
     };
 
     try {
       const data = await docClient.send(new QueryCommand(params));
-      return data.Items; // Returns the list of clients
+      return data.Items; // Returns the list of planners
     } catch (error) {
       console.error("Error querying table by organization:", error);
       throw new Error("Error querying table by organization");
     }
   },
 
-  //PUT NEW client data
-  addClient: async (data) => {
-    const clientData = {
+  addPlanner: async (data) => {
+    const plannerData = {
       ...data,
-      PK: "ORG::1",
-      SK: "CLIENT::" + uuidv4(),
+      PK: "ORG::1", //! hard coded needs to pull from the context user
+      SK: "PLANNER::" + uuidv4(),
     }
     const params = {
       TableName: TABLE_NAME, // Replace w ith your table name
-      Item: clientData,
+      Item: plannerData,
     };
 
     try {
       await docClient.send(new PutCommand(params));
-      return clientData; // Return the added client data
+      return plannerData; // Return the added planner data
     } catch (error) {
-      console.error("Error adding client:", error);
-      throw new Error("Error adding client");
+      console.error("Error adding planner:", error);
+      throw new Error("Error adding planner");
     }
   },
 
-  //PUT update client data
-  updateClient: async (clientData, updateData) => {
-    console.log("updateData", updateData)
-    console.log("clientData", clientData)
+  updatePlanner: async (plannerData, updateData) => {
+    console.log("updateData", updateData);
+    console.log("plannerData", plannerData);
     if (!updateData || Object.keys(updateData).length === 0) {
       throw new Error("No update data provided");
     }
@@ -84,7 +81,7 @@ const ClientModel = {
 
     const params = {
       TableName: TABLE_NAME,
-      Key: { PK: clientData.PK, SK: clientData.SK },
+      Key: { PK: plannerData.PK, SK: plannerData.SK },
       UpdateExpression: updateExpression,
       ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
@@ -95,27 +92,25 @@ const ClientModel = {
       const data = await docClient.send(new UpdateCommand(params));
       return data.Attributes; // Returns the updated attributes
     } catch (error) {
-      console.error("Error updating client:", error);
-      throw new Error("Error updating client");
+      console.error("Error updating planner:", error);
+      throw new Error("Error updating planner");
     }
   },
 
-  //DELETE client data
-  deleteClient: async (clientId) => {
+  deletePlanner: async (plannerData) => {
     const params = {
       TableName: TABLE_NAME,
-      Key: { PK: clientId.PK, SK: clientId.SK }, // Assuming 'SK' is the primary key
+      Key: { PK: plannerData.PK, SK: plannerData.SK },
     };
 
     try {
-      await docClient.send(new DeleteCommand(params));
-      return clientId; // Returns the deleted client id
+      const data = await docClient.send(new DeleteCommand(params));
+      return data.Attributes; // Returns the deleted planner data
     } catch (error) {
       console.error("Error deleting client:", error);
       throw new Error("Error deleting client");
     }
   },
-
 };
 
-module.exports = ClientModel;
+module.exports = PlannerModel;

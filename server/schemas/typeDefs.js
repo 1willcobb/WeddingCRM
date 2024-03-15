@@ -4,25 +4,25 @@ const typeDefs = gql`
   type Query {
     hello: String
     sup: String
-    clients: [Client]
+    getClients: [Client]
+    getPlanners: [Planner]
+    getVenues: [Venue]
   }
 
   type Mutation {
     addClient(
-      PK: ID!
-      SK: ID!
-      budget: Int
-      email: String
-      eventDate: String
-      inquiry: String
-      name: String
-      notes: String
-      package: String
-      phone: String
-      plannerPK: ID
-      projectPK: ID
-      status: String
-      venuePK: ID
+      name: String = ""
+      budget: Int = 0
+      email: String = ""
+      eventDate: String = ""
+      inquiry: String = ""
+      notes: String = ""
+      package: String = ""
+      phone: String = ""
+      plannerPK: [String] = []
+      projectPK: [String] = []
+      status: String = "New" # Example of setting a default status
+      venuePK: [String] = []
     ): Client
 
     updateClient(
@@ -36,45 +36,74 @@ const typeDefs = gql`
       notes: String
       package: String
       phone: String
-      plannerPK: ID
-      projectPK: ID
+      plannerPK: [String]
+      projectPK: [String]
       status: String
-      venuePK: ID
+      venuePK: [String]
     ): Client
 
-    deleteClient(
+    deleteClient(PK: ID!, SK: ID!): Client
+
+    addPlanner(
+      name: String = ""
+      email: String = ""
+      notes: String = ""
+      phone: String = ""
+      clients: [String] = []
+    ): Planner
+
+    updatePlanner(
+      PK: ID!
+      SK: ID!
+      name: String
+      email: String
+      notes: String
+      phone: String
+      clients: [String]
+    ): Planner
+
+    deletePlanner(PK: ID!, SK: ID!): Planner
+
+    addVenue(
+      budget: Int = 0
+      email: String = ""
+      guestCount: Int = 0
+      name: String = ""
+      notes: String = ""
+      phone: String = ""
+      clients: [String] = []
+    ): Venue
+
+    updateVenue(
       PK: ID!
       SK: ID!
       budget: Int
       email: String
-      eventDate: String
-      inquiry: String
+      guestCount: Int
       name: String
       notes: String
-      package: String
       phone: String
-      plannerPK: ID
-      projectPK: ID
-      status: String
-      venuePK: ID
-    ): Client
+      clients: [String]
+    ): Venue
+
+    deleteVenue(PK: ID!, SK: ID!): Venue
   }
 
   type Client {
     PK: ID!
     SK: ID!
+    name: String
     budget: Int
     email: String
     eventDate: String
     inquiry: String
-    name: String
     notes: String
     package: String
     phone: String
-    plannerPK: ID # add name of planner, maybe link to planner page
-    projectPK: ID
+    plannerPK: [String]
+    projectPK: [String]
     status: String
-    venuePK: ID
+    venuePK: [String]
   }
 
   type Venue {
@@ -85,32 +114,31 @@ const typeDefs = gql`
     guestCount: Int
     name: String
     notes: String
-    package: String
     phone: String
-    clients: [Client]
+    clients: [String]
   }
 
   type Planner {
     PK: ID!
     SK: ID!
-    email: String
     name: String
+    email: String
     notes: String
     phone: String
-    clients: [Client]
+    clients: [String]
   }
 
   type Project {
     PK: ID!
     SK: ID!
-    clients: [Client]
+    clients: [String]
     budget: Int
     eventDate: String
     name: String
     notes: String
     package: String
-    plannerPK: ID
-    venuePK: ID
+    plannerPK: [String]
+    venuePK: [String]
   }
 `;
 
