@@ -20,7 +20,11 @@ const TableCell = styled.td`
 `;
 
 const Home = () => {
-  const { loading, data, refetch } = useQuery(CLIENTS);
+  const {
+    loading: clientsLoading,
+    data: clientsData,
+    refetch: refetchClients,
+  } = useQuery(CLIENTS);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [selectedField, setSelectedField] = useState({
@@ -36,16 +40,16 @@ const Home = () => {
   const closeModal = () => setIsModalOpen(false);
 
   const refetchData = () => {
-    refetch();
+    refetchClients();
   };
 
   const handleKeyPress = (e, clientId, value) => {
     if (e.key === "Enter") {
       console.log(clientId, value);
     }
-  }
+  };
 
-  if (loading) {
+  if (clientsLoading) {
     return <div>Loading...</div>;
   }
 
@@ -71,7 +75,7 @@ const Home = () => {
           </tr>
         </thead>
         <tbody>
-          {data.clients.map((client, index) => (
+          {clientsData.getClients.map((client, index) => (
             <tr key={client.SK}>
               <TableCell onClick={() => selectField("name", index)}>
                 {selectedField.field === "name" &&
@@ -82,7 +86,9 @@ const Home = () => {
                     placeholder="Name"
                     defaultValue={client.name}
                     onFocus={() => selectField("name", index)}
-                    onKeyDown={(e) => handleKeyPress(e, client.SK, e.target.value)}
+                    onKeyDown={(e) =>
+                      handleKeyPress(e, client.SK, e.target.value)
+                    }
                   />
                 ) : (
                   client.name
@@ -180,11 +186,11 @@ const Home = () => {
                 )}
               </TableCell>
               <TableCell onClick={() => selectField("plannerPK", index)}>
-                {selectedField.field === "plannerPK" &&
+              {selectedField.field === "plannerPK" &&
                 selectedField.index === index ? (
                   <input
                     type="text"
-                    placeholder="Planner PK"
+                    placeholder="planner"
                     value={client.plannerPK}
                     onFocus={() => selectField("plannerPK", index)}
                   />
