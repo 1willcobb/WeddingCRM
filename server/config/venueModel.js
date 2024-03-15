@@ -5,6 +5,7 @@ const {
   PutCommand,
   UpdateCommand,
   DeleteCommand,
+  GetCommand,
 } = require("@aws-sdk/lib-dynamodb");
 const { v4: uuidv4 } = require("uuid");
 
@@ -34,6 +35,32 @@ const VenueModel = {
     } catch (error) {
       console.error("Error querying table by organization:", error);
       throw new Error("Error querying table by organization");
+    }
+  },
+  getSingleVenue: async function (args) {
+    const params = {
+      TableName: TABLE_NAME,
+      Key: { PK: args.PK, SK: args.SK },
+    };
+
+    try {
+      const data = await docClient.send(new GetCommand(params));
+
+      if (!data.Item) {
+        throw new Error("Venue not found");
+      }
+
+      console.log("data", data.Item);
+
+      return data.Item; // Returns the Venue data with Venues attached
+    } catch (error) {
+      console.error(
+        "Error querying table for a single Venue and associated Venues:",
+        error
+      );
+      throw new Error(
+        "Error querying table for a single Venue and associated Venues"
+      );
     }
   },
 

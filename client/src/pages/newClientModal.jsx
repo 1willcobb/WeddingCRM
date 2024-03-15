@@ -94,7 +94,7 @@ const NewClientModal = ({ isOpen, onClose, onRefetch }) => {
     // Generate UUID only when the component mounts
     setClientData((currentData) => ({
       ...currentData,
-      sk: "CLIENT::" + uuid(),
+      sk: "CLIENT::" + uuid(), //!This shouldent be on the client
     }));
   }, [isOpen]);
   

@@ -5,8 +5,9 @@ const {
   PutCommand,
   UpdateCommand,
   DeleteCommand,
+  GetCommand
 } = require("@aws-sdk/lib-dynamodb");
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 
 // Configure AWS DynamoDB Client
 const dbClient = new DynamoDBClient({
@@ -37,13 +38,38 @@ const PlannerModel = {
       throw new Error("Error querying table by organization");
     }
   },
+  getSinglePlanner: async function (args) {
+    const params = {
+      TableName: TABLE_NAME,
+      Key: { PK: args.PK, SK: args.SK },
+    };
+
+    try {
+      const data = await docClient.send(new GetCommand(params));
+
+      if (!data.Item) {
+        throw new Error("Planner not found");
+      }
+      console.log("data", data.Item);
+      
+      return data.Item; // Returns the planner data with planners attached
+    } catch (error) {
+      console.error(
+        "Error querying table for a single planner and associated planners:",
+        error
+      );
+      throw new Error(
+        "Error querying table for a single planner and associated planners"
+      );
+    }
+  },
 
   addPlanner: async (data) => {
     const plannerData = {
       ...data,
       PK: "ORG::1", //! hard coded needs to pull from the context user
       SK: "PLANNER::" + uuidv4(),
-    }
+    };
     const params = {
       TableName: TABLE_NAME, // Replace w ith your table name
       Item: plannerData,

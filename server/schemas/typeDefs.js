@@ -5,8 +5,11 @@ const typeDefs = gql`
     hello: String
     sup: String
     getClients: [Client]
+    getSingleClient(PK: ID!, SK: ID!): Client
     getPlanners: [Planner]
+    getSinglePlanner(PK: ID!, SK: ID!): Planner
     getVenues: [Venue]
+    getSingleVenue(PK: ID!, SK: ID!): Venue
   }
 
   type Mutation {

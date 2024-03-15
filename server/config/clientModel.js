@@ -5,8 +5,10 @@ const {
   PutCommand,
   UpdateCommand,
   DeleteCommand,
+  GetCommand,
+  BatchGetCommand,
 } = require("@aws-sdk/lib-dynamodb");
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 
 // Configure AWS DynamoDB Client
 const dbClient = new DynamoDBClient({
@@ -26,7 +28,7 @@ const ClientModel = {
       KeyConditionExpression: "PK = :PK and begins_with(SK, :SKprefix)",
       ExpressionAttributeValues: {
         ":PK": "ORG::1", //! hard coded needs to change
-        ":SKprefix": "CLIENT::"
+        ":SKprefix": "CLIENT::",
       },
     };
 
@@ -38,6 +40,34 @@ const ClientModel = {
       throw new Error("Error querying table by organization");
     }
   },
+  //GET a single client for an organization
+  getSingleClient: async function (args) {
+    // Added clientId as a parameter
+    const params = {
+      TableName: TABLE_NAME,
+      Key: { PK: args.PK, SK: args.SK },
+    };
+
+    try {
+      const data = await docClient.send(new GetCommand(params));
+
+      if (!data.Item) {
+        throw new Error("Client not found");
+      }
+
+      console.log("data", data.Item);
+
+      return data.Item; // Returns the client data with planners attached
+    } catch (error) {
+      console.error(
+        "Error querying table for a single client and associated planners:",
+        error
+      );
+      throw new Error(
+        "Error querying table for a single client and associated planners"
+      );
+    }
+  },
 
   //PUT NEW client data
   addClient: async (data) => {
@@ -45,7 +75,7 @@ const ClientModel = {
       ...data,
       PK: "ORG::1",
       SK: "CLIENT::" + uuidv4(),
-    }
+    };
     const params = {
       TableName: TABLE_NAME, // Replace w ith your table name
       Item: clientData,
@@ -62,8 +92,8 @@ const ClientModel = {
 
   //PUT update client data
   updateClient: async (clientData, updateData) => {
-    console.log("updateData", updateData)
-    console.log("clientData", clientData)
+    console.log("updateData", updateData);
+    console.log("clientData", clientData);
     if (!updateData || Object.keys(updateData).length === 0) {
       throw new Error("No update data provided");
     }
@@ -115,7 +145,6 @@ const ClientModel = {
       throw new Error("Error deleting client");
     }
   },
-
 };
 
 module.exports = ClientModel;

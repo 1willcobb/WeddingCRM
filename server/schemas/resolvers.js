@@ -5,15 +5,21 @@ const resolvers = {
     getClients: async (parent, args, context) => {
       return await context.Client.getClients();
     },
-    //TODO getSingleClient
+    getSingleClient: async (parent, args, context) => {
+      return await context.Client.getSingleClient(args);
+    },
     getPlanners: async (parent, args, context) => {
       return await context.Planner.getPlanners();
     },
-    //TODO getSinglePlanner
+    getSinglePlanner: async (parent, args, context) => {
+      return await context.Planner.getSinglePlanner(args);
+    },
     getVenues: async (parent, args, context) => {
       return await context.Venue.getVenues();
-    }
-    //TODO getSingleVenue
+    },
+    getSingleVenue: async (parent, args, context) => {
+      return await context.Venue.getSingleVenue(args);
+    },
   },
   Mutation: {
     addClient: async (_, args, context) => {
