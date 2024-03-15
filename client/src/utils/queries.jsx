@@ -22,6 +22,7 @@ export const CLIENTS = gql`
       projectPK
       status
       venuePK
+      plannerNames
     }
   }
 `;

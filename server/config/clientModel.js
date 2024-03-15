@@ -6,7 +6,6 @@ const {
   UpdateCommand,
   DeleteCommand,
   GetCommand,
-  BatchGetCommand,
 } = require("@aws-sdk/lib-dynamodb");
 const { v4: uuidv4 } = require("uuid");
 
@@ -34,7 +33,12 @@ const ClientModel = {
 
     try {
       const data = await docClient.send(new QueryCommand(params));
-      return data.Items; // Returns the list of clients
+
+      if (!data.Items) {
+        throw new Error("Clients not found");
+      }
+
+      return data.Items; // Returns the list of clients with their planner's name
     } catch (error) {
       console.error("Error querying table by organization:", error);
       throw new Error("Error querying table by organization");

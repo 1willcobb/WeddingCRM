@@ -14,18 +14,15 @@ const typeDefs = gql`
 
   type Mutation {
     addClient(
-      name: String = ""
-      budget: Int = 0
-      email: String = ""
-      eventDate: String = ""
-      inquiry: String = ""
-      notes: String = ""
-      package: String = ""
-      phone: String = ""
-      plannerPK: [String] = []
-      projectPK: [String] = []
-      status: String = "New" # Example of setting a default status
-      venuePK: [String] = []
+      name: String
+      budget: Int
+      email: String
+      eventDate: String
+      inquiry: String
+      notes: String
+      package: String
+      phone: String
+      status: String
     ): Client
 
     updateClient(
@@ -39,20 +36,22 @@ const typeDefs = gql`
       notes: String
       package: String
       phone: String
+      status: String
       plannerPK: [String]
       projectPK: [String]
-      status: String
       venuePK: [String]
+      plannerNames: [String]
+      projectNames: [String]
+      venueNames: [String]
     ): Client
 
     deleteClient(PK: ID!, SK: ID!): Client
 
     addPlanner(
-      name: String = ""
-      email: String = ""
-      notes: String = ""
-      phone: String = ""
-      clients: [String] = []
+      name: String
+      email: String
+      notes: String
+      phone: String
     ): Planner
 
     updatePlanner(
@@ -63,18 +62,22 @@ const typeDefs = gql`
       notes: String
       phone: String
       clients: [String]
+      plannerPK: [String]
+      projectPK: [String]
+      clientNames: [String]
+      projectNames: [String]
+      venueNames: [String]
     ): Planner
 
     deletePlanner(PK: ID!, SK: ID!): Planner
 
     addVenue(
-      budget: Int = 0
-      email: String = ""
-      guestCount: Int = 0
-      name: String = ""
-      notes: String = ""
-      phone: String = ""
-      clients: [String] = []
+      budget: Int
+      email: String
+      guestCount: Int
+      name: String
+      notes: String
+      phone: String
     ): Venue
 
     updateVenue(
@@ -87,6 +90,11 @@ const typeDefs = gql`
       notes: String
       phone: String
       clients: [String]
+      plannerPK: [String]
+      projectPK: [String]
+      plannerNames: [String]
+      projectNames: [String]
+      clientNames: [String]
     ): Venue
 
     deleteVenue(PK: ID!, SK: ID!): Venue
@@ -103,10 +111,13 @@ const typeDefs = gql`
     notes: String
     package: String
     phone: String
+    status: String
     plannerPK: [String]
     projectPK: [String]
-    status: String
     venuePK: [String]
+    plannerNames: [String]
+    projectNames: [String]
+    venueNames: [String]
   }
 
   type Venue {
@@ -119,6 +130,11 @@ const typeDefs = gql`
     notes: String
     phone: String
     clients: [String]
+    plannerPK: [String]
+    projectPK: [String]
+    plannerNames: [String]
+    projectNames: [String]
+    clientNames: [String]
   }
 
   type Planner {
@@ -129,19 +145,27 @@ const typeDefs = gql`
     notes: String
     phone: String
     clients: [String]
+    plannerPK: [String]
+    projectPK: [String]
+    clientNames: [String]
+    projectNames: [String]
+    venueNames: [String]
   }
 
   type Project {
     PK: ID!
     SK: ID!
-    clients: [String]
     budget: Int
     eventDate: String
     name: String
     notes: String
     package: String
+    clients: [String]
     plannerPK: [String]
     venuePK: [String]
+    venueNames: [String]
+    plannerNames: [String]
+    clientNames: [String]
   }
 `;
 
