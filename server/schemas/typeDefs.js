@@ -37,12 +37,9 @@ const typeDefs = gql`
       package: String
       phone: String
       status: String
-      plannerPK: [String]
-      projectPK: [String]
-      venuePK: [String]
-      plannerNames: [String]
-      projectNames: [String]
-      venueNames: [String]
+      planners: [PlannerInput]
+      venues: [VenueInput]
+      projects: [ProjectInput]
     ): Client
 
     deleteClient(PK: ID!, SK: ID!): Client
@@ -61,12 +58,9 @@ const typeDefs = gql`
       email: String
       notes: String
       phone: String
-      clients: [String]
-      plannerPK: [String]
-      projectPK: [String]
-      clientNames: [String]
-      projectNames: [String]
-      venueNames: [String]
+      clients: [ClientInput]
+      projects: [ProjectInput]
+      venues: [VenueInput]
     ): Planner
 
     deletePlanner(PK: ID!, SK: ID!): Planner
@@ -89,15 +83,52 @@ const typeDefs = gql`
       name: String
       notes: String
       phone: String
-      clients: [String]
-      plannerPK: [String]
-      projectPK: [String]
-      plannerNames: [String]
-      projectNames: [String]
-      clientNames: [String]
+      clients: [ClientInput]
+      planners: [PlannerInput]
+      projects: [ProjectInput]
     ): Venue
 
     deleteVenue(PK: ID!, SK: ID!): Venue
+  }
+
+  type PlannerOutput {
+    id: ID!
+    name: String!
+  }
+
+  type ProjectOutput {
+    id: ID!
+    name: String!
+  }
+
+  type VenueOutput {
+    id: ID!
+    name: String!
+  }
+
+  type ClientOutput {
+    id: ID!
+    name: String!
+  }
+
+  input ClientInput {
+    id: ID!
+    name: String!
+  }
+
+  input PlannerInput {
+    id: ID!
+    name: String!
+  }
+
+  input ProjectInput {
+    id: ID!
+    name: String!
+  }
+
+  input VenueInput {
+    id: ID!
+    name: String!
   }
 
   type Client {
@@ -112,12 +143,9 @@ const typeDefs = gql`
     package: String
     phone: String
     status: String
-    plannerPK: [String]
-    projectPK: [String]
-    venuePK: [String]
-    plannerNames: [String]
-    projectNames: [String]
-    venueNames: [String]
+    planners: [PlannerOutput]
+    venues: [VenueOutput]
+    projects: [ProjectOutput]
   }
 
   type Venue {
@@ -129,12 +157,9 @@ const typeDefs = gql`
     name: String
     notes: String
     phone: String
-    clients: [String]
-    plannerPK: [String]
-    projectPK: [String]
-    plannerNames: [String]
-    projectNames: [String]
-    clientNames: [String]
+    planners: [PlannerOutput]
+    projects: [ProjectOutput]
+    clients: [ClientOutput]
   }
 
   type Planner {
@@ -144,12 +169,9 @@ const typeDefs = gql`
     email: String
     notes: String
     phone: String
-    clients: [String]
-    plannerPK: [String]
-    projectPK: [String]
-    clientNames: [String]
-    projectNames: [String]
-    venueNames: [String]
+    clients: [ClientOutput]
+    projects: [ProjectOutput]
+    venues: [VenueOutput]
   }
 
   type Project {
@@ -160,12 +182,9 @@ const typeDefs = gql`
     name: String
     notes: String
     package: String
-    clients: [String]
-    plannerPK: [String]
-    venuePK: [String]
-    venueNames: [String]
-    plannerNames: [String]
-    clientNames: [String]
+    venues: [VenueOutput]
+    planners: [PlannerOutput]
+    clients: [ClientOutput]
   }
 `;
 
