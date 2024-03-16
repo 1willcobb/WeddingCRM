@@ -1,3 +1,6 @@
+const { json } = require("express");
+const { ApolloError } = require("apollo-server-errors");
+
 const resolvers = {
   Query: {
     hello: () => "Hello, worlds!",
@@ -20,6 +23,12 @@ const resolvers = {
     getSingleVenue: async (parent, args, context) => {
       return await context.Venue.getSingleVenue(args);
     },
+    getProjects: async (parent, args, context) => {
+      return await context.Project.getProjects();
+    },
+    getSingleProject: async (parent, args, context) => {
+      return await context.Project.getSingleProject(args);
+    },
   },
   Mutation: {
     addClient: async (_, args, context) => {
@@ -33,14 +42,13 @@ const resolvers = {
 
         return await context.Client.addClient(template);
       } catch (error) {
-        // Handle the error here
         console.error(error);
         throw new Error("An error occurred while adding a client.");
       }
     },
     updateClient: async (_, args, context) => {
       try {
-        const clientData = {
+        const projectData = {
           PK: args.PK,
           SK: args.SK,
         };
@@ -50,24 +58,23 @@ const resolvers = {
 
         const client = await context.Client.getSingleClient(clientData);
 
-        //get single vendor
-        //check if they exist
-        //if they do grab the vendor array from the client and store it in a variable
-        //grab the vendor name and id and make an object {id: id, name: name}
-        //push the object into the vendor array
-        //add that to the updateData object under the key "clients, venue, projects, or planners"
-        //after doing that for each category, update the client. 
-
         if (!client) {
           throw new Error("Client not found");
         }
 
         let clientPlanners = [];
-        if (client.plannerPK) {
-          clientPlanners.push(client.plannerPK);
+        if (client.planners) {
+          clientPlanners.push(...client.planners);
         }
 
-        if (args.plannerPK) {
+        //* check if a new planner was supplied
+        if (args.planners) {
+          if (
+            clientPlanners.some((planner) => planner.id === args.planners[0].id)
+          ) {
+            throw new Error("Planner Already Exists", "DUPLICATE_PLANNER");
+          }
+
           const plannerData = {
             PK: args.PK,
             SK: args.planners[0].id, // {id: "PLANER::**", name: "JACK"}
@@ -81,61 +88,77 @@ const resolvers = {
             throw new Error("Planner not found");
           }
 
-          let clientPlanners = [
-            ...singlePlanner.clients,
-            { id: client.SK, name: client.name },
-          ];
+          const plannerClients = singlePlanner.clients;
 
-          console.log("clientPlanners " + clientPlanners);
+          plannerClients.push({ id: client.SK, name: client.name });
+
+          console.log("plannerClients " + plannerClients);
 
           const updatePlannerData = {
-            clients: clientPlanners,
+            clients: plannerClients,
           };
 
-          const plannerUpdate = await context.Planner.updatePlanner(
-            plannerData,
-            updatePlannerData
-          );
-          console.log("planner updated", plannerUpdate);
+          await context.Planner.updatePlanner(plannerData, updatePlannerData);
+
+          clientPlanners.push({
+            id: singlePlanner.SK,
+            name: singlePlanner.name,
+          });
+          updateData.planners = clientPlanners;
         }
 
-        //??????????????????????dd
-        if (args.venuePK) {
-          const venueData = {
-            PK: args.PK,
-            SK: args.venuePK[args.venuePK.length - 1],
-          };
+        let clientVenues = [];
+        if (client.venues) {
+          clientVenues.push(...client.venues);
+        }
 
-          const singleVenue = await context.Venue.getSingleVenue(venueData);
-          if (!singleVenue) {
-            throw new Error("Planner not found");
+        //* check if a new Venue was supplied
+        if (args.venues) {
+          if (
+            clientVenues.some((venues) => venues.id === args.venues[0].id)
+          ) {
+            throw new Error("VENUE Already Exists", "DUPLICATE_VENUE");
           }
 
-          let venueClientPKList = [...singleVenue.clients, client.SK];
-          let venueClientNameList = [...singleVenue.clientNames, client.name];
-
-          console.log("venueClientPKList " + venueClientPKList);
-          console.log("venueClientNameList " + venueClientNameList);
-
-          const updateVenueData = {
-            clients: venueClientPKList,
-            clientNames: venueClientNameList,
+          const venueData = {
+            PK: args.PK,
+            SK: args.venues[0].id, // {id: "PLANER::**", name: "JACK"}
           };
 
-          const venueUpdate = await context.Venue.updateVenue(
-            venueData,
-            updateVenueData
+          const singleVenue = await context.Venue.getSingleVenue(
+            venueData
           );
-          console.log("venue updated", venueUpdate);
-        }
-        //??????????????????????
 
+          if (!singleVenue) {
+            throw new Error("Venue not found");
+          }
+
+          const venueClients = singleVenue.clients;
+
+          venueClients.push({ id: client.SK, name: client.name });
+
+          console.log("venueClients " + venueClients);
+
+          const updateVenueData = {
+            clients: venueClients,
+          };
+
+          await context.Venue.updateVenue(venueData, updateVenueData);
+
+          clientVenues.push({
+            id: singleVenue.SK,
+            name: singleVenue.name,
+          });
+          updateData.venues = clientVenues;
+        }
+
+        //*** FINALLY update the client */
         const clientUpdate = await context.Client.updateClient(
           clientData,
           updateData
         );
 
-        console.log("args", args);
+        console.log("client updated", clientUpdate);
 
         return clientUpdate;
       } catch (error) {
@@ -227,6 +250,149 @@ const resolvers = {
       } catch (error) {
         console.error(error);
         throw new Error("An error occurred while deleting a venue.");
+      }
+    },
+    addProject: async (_, args, context) => {
+      try {
+        template = {
+          ...args,
+          clients: [],
+          planners: [],
+          venues: [],
+        };
+
+        return await context.Project.addProject(template);
+      } catch (error) {
+        console.error(error);
+        throw new Error("An error occurred while adding a project.");
+      }
+    },
+    updateProject: async (_, args, context) => {
+      try {
+        const projectData = {
+          PK: args.PK,
+          SK: args.SK,
+        };
+        const updateData = { ...args };
+        delete updateData.PK; // Remove PK from updateData
+        delete updateData.SK; // Remove SK from updateData
+
+        const project = await context.Project.getSingleProject(projectData);
+
+        if (!project) {
+          throw new Error("Project not found");
+        }
+
+        let projectPlanners = [];
+        if (project.planners) {
+          projectPlanners.push(...project.planners);
+        }
+
+        //* check if a new planner was supplied
+        if (args.planners) {
+          if (
+            projectPlanners.some((planner) => planner.id === args.planners[0].id)
+          ) {
+            throw new Error("Planner Already Exists", "DUPLICATE_PLANNER");
+          }
+
+          const plannerData = {
+            PK: args.PK,
+            SK: args.planners[0].id, // {id: "PLANER::**", name: "JACK"}
+          };
+
+          const singlePlanner = await context.Planner.getSinglePlanner(
+            plannerData
+          );
+
+          if (!singlePlanner) {
+            throw new Error("Planner not found");
+          }
+
+          const plannerClients = singlePlanner.clients;
+
+          plannerClients.push({ id: project.SK, name: project.name });
+
+          console.log("plannerClients " + plannerClients);
+
+          const updatePlannerData = {
+            clients: plannerClients,
+          };
+
+          await context.Planner.updatePlanner(plannerData, updatePlannerData);
+
+          projectPlanners.push({
+            id: singlePlanner.SK,
+            name: singlePlanner.name,
+          });
+          updateData.planners = projectPlanners;
+        }
+
+        let projectVenues = [];
+        if (project.venues) {
+          projectVenues.push(...project.venues);
+        }
+
+        //* check if a new Venue was supplied
+        if (args.venues) {
+          if (
+            projectVenues.some((venues) => venues.id === args.venues[0].id)
+          ) {
+            throw new Error("VENUE Already Exists", "DUPLICATE_VENUE");
+          }
+
+          const venueData = {
+            PK: args.PK,
+            SK: args.venues[0].id, // {id: "PLANER::**", name: "JACK"}
+          };
+
+          const singleVenue = await context.Venue.getSingleVenue(
+            venueData
+          );
+
+          if (!singleVenue) {
+            throw new Error("Venue not found");
+          }
+
+          const venueClients = singleVenue.clients;
+
+          venueClients.push({ id: project.SK, name: project.name });
+
+          console.log("venueClients " + venueClients);
+
+          const updateVenueData = {
+            clients: venueClients,
+          };
+
+          await context.Venue.updateVenue(venueData, updateVenueData);
+
+          projectVenues.push({
+            id: singleVenue.SK,
+            name: singleVenue.name,
+          });
+          updateData.venues = projectVenues;
+        }
+
+        //*** FINALLY update the project */
+        const projectUpdate = await context.Project.updateProject(
+          projectData,
+          updateData
+        );
+
+        console.log("project updated", projectUpdate);
+
+        return projectUpdate;
+      } catch (error) {
+        console.error(error);
+        throw new Error("An error occurred while updating a project.");
+      }
+    },
+    deleteClient: async (_, args, context) => {
+      try {
+        return await context.Project.deleteProject(args);
+      } catch (error) {
+        console.error(error);
+        throw new Error("An error occurred while deleting a project.");
       }
     },
   },

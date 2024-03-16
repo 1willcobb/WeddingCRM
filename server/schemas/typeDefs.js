@@ -10,6 +10,8 @@ const typeDefs = gql`
     getSinglePlanner(PK: ID!, SK: ID!): Planner
     getVenues: [Venue]
     getSingleVenue(PK: ID!, SK: ID!): Venue
+    getProjects: [Project]
+    getSingleProject(PK: ID!, SK: ID!): Project
   }
 
   type Mutation {
@@ -89,41 +91,64 @@ const typeDefs = gql`
     ): Venue
 
     deleteVenue(PK: ID!, SK: ID!): Venue
+
+    addProject(
+      budget: Int
+      eventDate: String
+      name: String
+      notes: String
+      package: String
+    ): Project
+
+    updateProject(
+      PK: ID!
+      SK: ID!
+      budget: Int
+      eventDate: String
+      name: String
+      notes: String
+      package: String
+      clients: [ClientInput]
+      planners: [PlannerInput]
+      venues: [VenueInput]
+    ): Project
+
+    deleteProject(PK: ID!, SK: ID!): Project
   }
 
   type PlannerOutput {
-    id: ID!
+    id: ID
     name: String!
   }
 
   type ProjectOutput {
-    id: ID!
+    id: ID
     name: String!
   }
 
   type VenueOutput {
-    id: ID!
+    id: ID
     name: String!
   }
 
   type ClientOutput {
-    id: ID!
-    name: String!
+    id: ID
+    name: String
   }
 
   input ClientInput {
     id: ID!
-    name: String!
+    name: String
   }
 
   input PlannerInput {
     id: ID!
-    name: String!
+    name: String
   }
 
   input ProjectInput {
     id: ID!
-    name: String!
+    name: String
   }
 
   input VenueInput {
