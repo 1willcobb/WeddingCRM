@@ -50,6 +50,14 @@ const resolvers = {
 
         const client = await context.Client.getSingleClient(clientData);
 
+        //get single vendor
+        //check if they exist
+        //if they do grab the vendor array from the client and store it in a variable
+        //grab the vendor name and id and make an object {id: id, name: name}
+        //push the object into the vendor array
+        //add that to the updateData object under the key "clients, venue, projects, or planners"
+        //after doing that for each category, update the client. 
+
         if (!client) {
           throw new Error("Client not found");
         }
