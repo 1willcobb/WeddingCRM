@@ -4,18 +4,14 @@ const typeDefs = gql`
   type Query {
     hello: String
     sup: String
-    getClients: [Client]
-    getSingleClient(PK: ID!, SK: ID!): Client
-    getPlanners: [Planner]
-    getSinglePlanner(PK: ID!, SK: ID!): Planner
-    getVenues: [Venue]
-    getSingleVenue(PK: ID!, SK: ID!): Venue
+    getContacts: [Contact]
+    getSingleContact(PK: ID!, SK: ID!): Contact
     getProjects: [Project]
     getSingleProject(PK: ID!, SK: ID!): Project
   }
 
   type Mutation {
-    addClient(
+    addContact(
       name: String
       budget: Int
       email: String
@@ -25,9 +21,10 @@ const typeDefs = gql`
       package: String
       phone: String
       status: String
-    ): Client
+      type: String
+    ): Contact
 
-    updateClient(
+    updateContact(
       PK: ID!
       SK: ID!
       budget: Int
@@ -39,58 +36,10 @@ const typeDefs = gql`
       package: String
       phone: String
       status: String
-      planners: ID
-      venues: ID
       projects: ID
-    ): Client
+    ): Contact
 
-    deleteClient(PK: ID!, SK: ID!): Client
-
-    addPlanner(
-      name: String
-      email: String
-      notes: String
-      phone: String
-    ): Planner
-
-    updatePlanner(
-      PK: ID!
-      SK: ID!
-      name: String
-      email: String
-      notes: String
-      phone: String
-      clients: [ClientInput]
-      projects: [ProjectInput]
-      venues: [VenueInput]
-    ): Planner
-
-    deletePlanner(PK: ID!, SK: ID!): Planner
-
-    addVenue(
-      budget: Int
-      email: String
-      guestCount: Int
-      name: String
-      notes: String
-      phone: String
-    ): Venue
-
-    updateVenue(
-      PK: ID!
-      SK: ID!
-      budget: Int
-      email: String
-      guestCount: Int
-      name: String
-      notes: String
-      phone: String
-      clients: [ClientInput]
-      planners: [PlannerInput]
-      projects: [ProjectInput]
-    ): Venue
-
-    deleteVenue(PK: ID!, SK: ID!): Venue
+    deleteContact(PK: ID!, SK: ID!): Contact
 
     addProject(
       budget: Int
@@ -111,27 +60,33 @@ const typeDefs = gql`
       clients: [ClientInput]
       planners: [PlannerInput]
       venues: [VenueInput]
+      vendors: [VendorInput]
     ): Project
 
     deleteProject(PK: ID!, SK: ID!): Project
   }
 
   type PlannerOutput {
-    id: ID
+    id: ID!
     name: String!
   }
 
   type ProjectOutput {
-    id: ID
+    id: ID!
     name: String!
   }
 
   type VenueOutput {
-    id: ID
+    id: ID!
     name: String!
   }
 
   type ClientOutput {
+    id: ID!
+    name: String!
+  }
+
+  type VendorOutput {
     id: ID
     name: String!
   }
@@ -156,7 +111,12 @@ const typeDefs = gql`
     name: String
   }
 
-  type Client {
+  input VendorInput {
+    id: ID!
+    name: String
+  }
+
+  type Contact {
     PK: ID!
     SK: ID!
     name: String
@@ -168,35 +128,7 @@ const typeDefs = gql`
     package: String
     phone: String
     status: String
-    planners: [PlannerOutput]
-    venues: [VenueOutput]
     projects: [ProjectOutput]
-  }
-
-  type Venue {
-    PK: ID!
-    SK: ID!
-    budget: Int
-    email: String
-    guestCount: Int
-    name: String
-    notes: String
-    phone: String
-    planners: [PlannerOutput]
-    projects: [ProjectOutput]
-    clients: [ClientOutput]
-  }
-
-  type Planner {
-    PK: ID!
-    SK: ID!
-    name: String
-    email: String
-    notes: String
-    phone: String
-    clients: [ClientOutput]
-    projects: [ProjectOutput]
-    venues: [VenueOutput]
   }
 
   type Project {
@@ -210,6 +142,7 @@ const typeDefs = gql`
     venues: [VenueOutput]
     planners: [PlannerOutput]
     clients: [ClientOutput]
+    vendors: [VendorOutput]
   }
 `;
 
