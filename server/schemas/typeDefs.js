@@ -39,9 +39,9 @@ const typeDefs = gql`
       package: String
       phone: String
       status: String
-      planners: [PlannerInput]
-      venues: [VenueInput]
-      projects: [ProjectInput]
+      planners: ID
+      venues: ID
+      projects: ID
     ): Client
 
     deleteClient(PK: ID!, SK: ID!): Client
@@ -133,7 +133,7 @@ const typeDefs = gql`
 
   type ClientOutput {
     id: ID
-    name: String
+    name: String!
   }
 
   input ClientInput {
@@ -153,7 +153,7 @@ const typeDefs = gql`
 
   input VenueInput {
     id: ID!
-    name: String!
+    name: String
   }
 
   type Client {
