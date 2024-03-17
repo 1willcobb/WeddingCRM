@@ -2,9 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const { ApolloServer, gql } = require("apollo-server-express");
 const { typeDefs, resolvers } = require("./schemas");
-const clientModel = require("./config/clientModel.js");
-const plannerModel = require("./config/plannerModel.js");
-const venueModel = require("./config/venueModel.js");
+const contactModel = require("./config/contactModel.js");
 const projectModel = require("./config/projectModel.js");
 
 const PORT = process.env.PORT || 3001;
@@ -14,9 +12,7 @@ const apolloServer = new ApolloServer({
   typeDefs,
   resolvers,
   context: ({ req }) => ({
-    Client: clientModel,
-    Planner: plannerModel,
-    Venue: venueModel,
+    Contact: contactModel,
     Project: projectModel,
   }),
 });
