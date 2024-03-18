@@ -57,10 +57,10 @@ const typeDefs = gql`
       name: String
       notes: String
       package: String
-      clients: [ClientInput]
-      planners: [PlannerInput]
-      venues: [VenueInput]
-      vendors: [VendorInput]
+      client: ID
+      planner: ID
+      venue: ID
+      vendor: ID
     ): Project
 
     deleteProject(PK: ID!, SK: ID!): Project

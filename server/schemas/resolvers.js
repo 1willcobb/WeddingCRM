@@ -19,7 +19,6 @@ const resolvers = {
     },
   },
   Mutation: {
-    //*DONE
     addContact: async (_, args, context) => {
       try {
         template = {
@@ -33,7 +32,6 @@ const resolvers = {
         throw new Error("An error occurred while adding a client.");
       }
     },
-    //*DONE
     updateContact: async (_, args, context) => {
       try {
         // Destructure PK and SK for readability
@@ -65,7 +63,6 @@ const resolvers = {
 
         // Logic for adding a new project to the contact
         if (args.projects) {
-
           let contactProjects = contact.projects || [];
           if (contactProjects.some((project) => project.id === args.projects)) {
             throw new Error("Project Already Exists", "DUPLICATE_PROJECT");
@@ -91,7 +88,6 @@ const resolvers = {
 
           // Update the project with the new contact information
           await context.Project.updateProject(ProjectData, updateProjectData);
-
 
           console.log("Project updated------------------------");
           // Update the contact's projects list
@@ -123,16 +119,62 @@ const resolvers = {
         throw new Error("An error occurred while updating the contact.");
       }
     },
-    //TODO
     deleteContact: async (_, args, context) => {
+      const { PK, SK } = args;
+      console.log("deleting contact");
+
       try {
-        return await context.Contact.deleteContact(args);
+        const contact = await context.Contact.getSingleContact(args);
+        if (!contact) {
+          throw new Error("Contact not found");
+        }
+
+        if (!SK.startsWith("CONTACT::")) {
+          throw new Error("Invalid contact type");
+        }
+
+        const [, contactType, contactUUID] = SK.split("::");
+        if (!["VENDOR", "PLANNER", "VENUE", "CLIENT"].includes(contactType)) {
+          throw new Error("Unknown contact type");
+        }
+        if (contact.projects) {
+          const projectArrayType = contactType.toLowerCase() + "s"; // e.g., "vendors"
+
+          for (let project of contact.projects) {
+            const ProjectData = { PK: PK, SK: project.id };
+
+            const singleProject = await context.Project.getSingleProject(
+              ProjectData
+            );
+            if (!singleProject) {
+              throw new Error("Project not found");
+            }
+
+            const projectContacts = singleProject[projectArrayType] || [];
+            const updatedProjectContacts = projectContacts.filter(
+              (contact) => contact.id !== SK
+            );
+
+            const updateProjectData = {};
+            updateProjectData[projectArrayType] = updatedProjectContacts;
+
+            console.log(
+              `${projectArrayType} updated: `,
+              updatedProjectContacts
+            );
+
+            await context.Project.updateProject(ProjectData, updateProjectData);
+          }
+        }
+
+        await context.Contact.deleteContact(args);
+
+        return contact;
       } catch (error) {
         console.error(error);
         throw new Error("An error occurred while deleting a client.");
       }
     },
-    //*DONE
     addProject: async (_, args, context) => {
       try {
         template = {
@@ -149,97 +191,191 @@ const resolvers = {
         throw new Error("An error occurred while adding a project.");
       }
     },
-    //TODO
+    //Updates must be done on the contact level
     updateProject: async (_, args, context) => {
       try {
-        // Destructure PK and SK for readability
         const { PK, SK } = args;
-        const contactData = { PK, SK };
+        const projectData = { PK, SK };
 
-        // Validate and extract contact type from SK
-        if (!SK.startsWith("CONTACT::")) {
-          throw new Error("Invalid contact type");
-        }
-        const [, contactType, contactUUID] = SK.split("::");
-        if (!["VENDOR", "PLANNER", "VENUE", "CLIENT"].includes(contactType)) {
-          throw new Error("Unknown contact type");
+        const project = await context.Project.getSingleProject(args);
+
+        if (!project) {
+          throw new Error("Project not found");
         }
 
-        // Generate the property name dynamically
-        const projectArrayType = contactType.toLowerCase() + "s"; // e.g., "vendors"
-
-        // Remove PK and SK from the update data
-        const updateData = { ...args };
+        // Prepare the update data object
+        let updateData = { ...args };
         delete updateData.PK;
         delete updateData.SK;
 
-        // Retrieve the single contact
-        const contact = await context.Contact.getSingleContact(contactData);
-        if (!contact) {
-          throw new Error("Contact not found");
-        }
+        // // Check for client, venue, planner, or vendor in args and add them to the project
+        // if (args.client) {
+        //   const client = await context.Contact.getSingleContact({
+        //     PK,
+        //     SK: args.client,
+        //   });
 
-        // Logic for adding a new project to the contact
-        if (args.projects) {
-          let contactProjects = contact.projects || [];
-          if (contactProjects.some((project) => project.id === args.projects)) {
-            throw new Error("Project Already Exists", "DUPLICATE_PROJECT");
-          }
+        //   if (!client) {
+        //     throw new Error("Client not found");
+        //   }
 
-          const ProjectData = { PK, SK: args.projects };
-          const singleProject = await context.Project.getSingleProject(
-            ProjectData
-          );
-          if (!singleProject) {
-            throw new Error("Project not found");
-          }
+        //   project.clients = project.clients || []; // Ensure the array exists
+        //   project.clients.push({ id: args.client, name: client.name }); // Add the new client
+        //   updateData.clients = project.clients; // Prepare update data
 
-          // Retrieve or initialize the array for the specific contact type on the Project
-          const projectContacts = singleProject[projectArrayType] || [];
-          projectContacts.push({ id: contact.SK, name: contact.name });
+        //   const contactProjects = [
+        //     ...client.projects,
+        //     { id: project.SK, name: project.name },
+        //   ];
+        //   await context.Contact.updateContact(
+        //     { PK, SK: args.client },
+        //     { contactProjects }
+        //   );
+        // } else if (args.venue) {
+        //   const venue = await context.Contact.getSingleContact({
+        //     PK,
+        //     SK: args.venue,
+        //   });
 
-          console.log(`${projectArrayType} updated: `, projectContacts);
+        //   if (!venue) {
+        //     throw new Error("venue not found");
+        //   }
 
-          // Prepare the update data for the project
-          const updateProjectData = {};
-          updateProjectData[projectArrayType] = projectContacts; // Dynamically update the correct array
+        //   project.venues = project.venues || []; // Ensure the array exists
+        //   project.venues.push({ id: args.venue, name: venue.name }); // Add the new venue
+        //   updateData.venues = project.venues; // Prepare update data
+        //   const contactProjects = [
+        //     ...venue.projects,
+        //     { id: project.SK, name: project.name },
+        //   ];
+        //   await context.Contact.updateContact(
+        //     { PK, SK: args.venue },
+        //     { contactProjects }
+        //   );
+        // } else if (args.planner) {
+        //   console.log("planner", args.planner);
+        //   const planner = await context.Contact.getSingleContact({
+        //     PK,
+        //     SK: args.planner,
+        //   });
 
-          // Update the project with the new contact information
-          await context.Project.updateProject(ProjectData, updateProjectData);
+        //   if (!planner) {
+        //     throw new Error("planner not found");
+        //   }
+        //   project.planners = project.planners || []; // Ensure the array exists
+        //   project.planners.push({ id: args.planner, name: planner.name }); // Add the new planner
+        //   updateData.planners = project.planners; // Prepare update data
+        //   const contactProjects = [
+        //     ...planner.projects,
+        //     { id: project.SK, name: project.name },
+        //   ];
+        //   await context.Contact.updateContact(
+        //     { PK, SK: args.planner },
+        //     { contactProjects }
+        //   );
+        // } else if (args.vendor) {
+        //   const vendor = await context.Contact.getSingleContact({
+        //     PK,
+        //     SK: args.vendor,
+        //   });
 
-          // Update the contact's projects list
-          contactProjects.push({
-            id: singleProject.SK,
-            name: singleProject.name,
-          });
-          updateData.projects = contactProjects;
-        }
+        //   if (!vendor) {
+        //     throw new Error("vendor not found");
+        //   }
+        //   project.vendors = project.vendors || []; // Ensure the array exists
+        //   project.vendors.push({ id: args.vendor, name: vendor.name }); // Add the new vendor
+        //   updateData.vendors = project.vendors; // Prepare update data
+        //   const contactProjects = [
+        //     ...vendor.projects,
+        //     { id: project.SK, name: project.name },
+        //   ];
+        //   await context.Contact.updateContact(
+        //     { PK, SK: args.vendor },
+        //     { contactProjects }
+        //   );
+        // }
 
-        // Update the contact
-        const contactUpdate = await context.Contact.updateContact(
-          contactData,
+        // delete updateData.vendor;
+        // delete updateData.planner;
+        // delete updateData.client;
+        // delete updateData.venue;
+
+        // Update the project
+        const projectUpdate = await context.Project.updateProject(
+          projectData,
           updateData
         );
-        if (!contactUpdate) {
+        if (!projectUpdate) {
           throw new Error("Failed to update contact");
         }
 
         // Confirm the contact has been updated
-        const confirmUpdatedContact = await context.Contact.getSingleContact(
-          contactData
+        const confirmUpdatedProject = await context.Project.getSingleProject(
+          projectData
         );
-        console.log("Contact updated", confirmUpdatedContact);
 
-        return confirmUpdatedContact;
+        return confirmUpdatedProject;
       } catch (error) {
         console.error(error);
         throw new Error("An error occurred while updating the contact.");
       }
     },
-    //TODO
     deleteProject: async (_, args, context) => {
       try {
-        return await context.Project.deleteProject(args);
+        const project = await context.Project.getSingleProject(args);
+        if (!project) {
+          throw new Error("Project not found");
+        }
+
+        console.log("project Found", project);
+
+        if (project.clients) {
+          for (let client of project.clients) {
+            const contactData = { PK: args.PK, SK: client.id };
+            const contact = await context.Contact.getSingleContact(contactData);
+            const contactProjects = contact.projects.filter(
+              (project) => project.id !== args.SK
+            );
+            await context.Contact.updateContact(contactData, { projects: contactProjects });
+          }
+        }
+
+        if (project.venues) {
+          for (let client of project.venues) {
+            const contactData = { PK: args.PK, SK: client.id };
+            const contact = await context.Contact.getSingleContact(contactData);
+            const contactProjects = contact.projects.filter(
+              (project) => project.id !== args.SK
+            );
+            await context.Contact.updateContact(contactData, { projects: contactProjects });
+          }
+        }
+
+        if (project.planners) {
+          for (let client of project.planners) {
+            const contactData = { PK: args.PK, SK: client.id };
+            const contact = await context.Contact.getSingleContact(contactData);
+            const contactProjects = contact.projects.filter(
+              (project) => project.id !== args.SK
+            );
+            await context.Contact.updateContact(contactData, { projects: contactProjects });
+          }
+        }
+
+        if (project.vendors) {
+          for (let client of project.vendors) {
+            const contactData = { PK: args.PK, SK: client.id };
+            const contact = await context.Contact.getSingleContact(contactData);
+            const contactProjects = contact.projects.filter(
+              (project) => project.id !== args.SK
+            );
+            await context.Contact.updateContact(contactData, { projects: contactProjects });
+          }
+        }
+
+        await context.Project.deleteProject(args);
+
+        return project
       } catch (error) {
         console.error(error);
         throw new Error("An error occurred while deleting a project.");

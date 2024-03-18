@@ -57,8 +57,6 @@ const ProjectModel = {
         throw new Error("Project not found");
       }
 
-      console.log("data", data.Item);
-
       return data.Item; // Returns the project data with planners attached
     } catch (error) {
       console.error(
@@ -101,8 +99,6 @@ const ProjectModel = {
         throw new Error("Error fetching newly added client");
       }
 
-      console.log("Fetched new client", fetchedProject.Item);
-
       return fetchedProject.Item; // Return the actual data from DynamoDB
     } catch (error) {
       console.error("Error adding client:", error);
@@ -112,8 +108,6 @@ const ProjectModel = {
 
   //PUT update client data
   updateProject: async (projectData, updateData) => {
-    console.log("updateData", updateData);
-    console.log("projectData", projectData);
     if (!updateData || Object.keys(updateData).length === 0) {
       throw new Error("No update data provided");
     }
@@ -157,8 +151,6 @@ const ProjectModel = {
       if (!fetchedProject.Item) {
         throw new Error("Error fetching newly added project");
       }
-
-      console.log("Fetched new project", fetchedProject.Item);
 
       return fetchedProject.Item; // Return the actual data from DynamoDB
     } catch (error) {

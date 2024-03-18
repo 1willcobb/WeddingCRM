@@ -98,8 +98,6 @@ const ContactModel = {
         throw new Error("Error fetching newly added client");
       }
 
-      console.log("Fetched new client", fetchedClient.Item);
-
       return fetchedClient.Item; // Return the actual data from DynamoDB
     } catch (error) {
       console.error("Error adding client:", error);
@@ -153,23 +151,21 @@ const ContactModel = {
         throw new Error("Error fetching newly added client");
       }
 
-      console.log("Fetched new client", fetchedClient.Item);
-
       return fetchedClient.Item; // Return the actual data from DynamoDB
     } catch (error) {
       console.error("Error updating client:", error);
       throw new Error("Error updating client");
     }
   },
-  deleteContact: async (clientId) => {
+  deleteContact: async (clientData) => {
     const params = {
       TableName: TABLE_NAME,
-      Key: { PK: clientId.PK, SK: clientId.SK }, // Assuming 'SK' is the primary key
+      Key: { PK: clientData.PK, SK: clientData.SK }, // Assuming 'SK' is the primary key
     };
 
     try {
       await docClient.send(new DeleteCommand(params));
-      return clientId; // Returns the deleted client id
+      return clientData; // Returns the deleted client id
     } catch (error) {
       console.error("Error deleting client:", error);
       throw new Error("Error deleting client");
